@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import './Login.css';
+import clinicBg from '../assets/clinicbackground.png';
+import recruitmentBg from '../assets/recruitmentbackground.png';
 
 export default function Login({ onSwitchToRegister }) {
   const [email, setEmail] = useState('');
@@ -34,8 +36,9 @@ export default function Login({ onSwitchToRegister }) {
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#eef4f8' }}>
-      <div className="text-center">
+<div className="min-vh-100 d-flex align-items-center justify-content-center position-relative overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
+  <img src={clinicBg} alt="" style={{ position: 'absolute', top: -80, left: -80, width: 380, pointerEvents: 'none' }} />
+  <img src={recruitmentBg} alt="" style={{ position: 'absolute', bottom: -60, right: -60, width: 380, pointerEvents: 'none' }} />      <div className="text-center">
         <div className="card p-4 shadow-sm" style={{ maxWidth: '380px' }}>
           <h4 className="fw-bold">Clinic Management System</h4>
           <p className="text-muted">Enter your credentials to access your account.</p>
