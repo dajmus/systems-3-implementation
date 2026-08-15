@@ -1,0 +1,11 @@
+.registerbutton {
+  background-color: #0f6e73;
+  border-color: #0f6e73;
+}
+.registerbutton:hover {
+  background-color: #0c5a5e;
+  border-color: #0c5a5e;
+}
+.linklogin {
+  color: #0f6e73;
+}

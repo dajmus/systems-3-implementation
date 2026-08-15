@@ -34,9 +34,9 @@ export default function Login({ onSwitchToRegister }) {
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center">
+    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#eef4f8' }}>
       <div className="text-center">
-        <div className="card p-4 shadow-sm">
+        <div className="card p-4 shadow-sm" style={{ maxWidth: '380px' }}>
           <h4 className="fw-bold">Clinic Management System</h4>
           <p className="text-muted">Enter your credentials to access your account.</p>
 
