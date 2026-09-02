@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import './Register.css';
 import image1 from '../assets/image1.jpg';
 import image2 from '../assets/image2.jpg';
@@ -8,9 +8,11 @@ import image5 from '../assets/image5.jpeg';
 import patientTeal from '../assets/patientbg.png';
 import doctorConsultationWhite from '../assets/consultationbg.png';
 import { Carousel } from 'bootstrap';
+import { useEffect, useRef } from 'react';
 
 const wheelImages = [image1, image2, image3, image4, image5];
 const TEXTBOX_WIDTH = '420px';
+const API_BASE = '/api/accounts';
 
 export default function Register({ onSwitchToLogin }) {
   const [name, setName] = useState('');
@@ -21,19 +23,17 @@ export default function Register({ onSwitchToLogin }) {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [contactInfoError, setContactInfoError] = useState('');
+  const [serverError, setServerError] = useState('');
   const carouselRef = useRef(null);
 
   useEffect(() => {
     if (carouselRef.current) {
-      const carousel = new Carousel(carouselRef.current, {
-        interval: 3000,
-        ride: 'carousel',
-      });
+      const carousel = new Carousel(carouselRef.current, { interval: 3000, ride: 'carousel' });
       return () => carousel.dispose();
     }
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let hasError = false;
@@ -70,6 +70,29 @@ export default function Register({ onSwitchToLogin }) {
     }
 
     if (hasError) return;
+
+    setServerError('');
+
+    try {
+      const response = await fetch(`${API_BASE}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, contactInfo }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setServerError(data.message || 'Registration failed.');
+        return;
+      }
+
+      onSwitchToLogin();
+    } 
+    
+    catch (err) {
+      setServerError('Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -81,6 +104,8 @@ export default function Register({ onSwitchToLogin }) {
         <div className="card p-4 shadow-sm" style={{ maxWidth: '380px' }}>
           <h4 className="fw-bold">Create Account</h4>
           <p className="text-muted">Register to access the clinic system.</p>
+
+          {serverError && <div className="alert alert-danger py-2">{serverError}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3 text-start">
@@ -158,21 +183,12 @@ export default function Register({ onSwitchToLogin }) {
           </ul>
         </div>
 
-        <div
-          id="featureCarousel"
-          ref={carouselRef}
-          className="carousel slide"
-          style={{ width: '100%', maxWidth: TEXTBOX_WIDTH, marginTop: '32px' }}
-        >
+        <div id="featureCarousel" ref={carouselRef} className="carousel slide" style={{ width: '100%', maxWidth: TEXTBOX_WIDTH, marginTop: '32px' }}>
           <div className="carousel-inner">
             {wheelImages.map((img, idx) => (
               <div className={`carousel-item ${idx === 0 ? 'active' : ''}`} key={idx}>
                 <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img
-                    src={img}
-                    alt={`feature ${idx + 1}`}
-                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                  />
+                  <img src={img} alt={`feature ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                 </div>
               </div>
             ))}

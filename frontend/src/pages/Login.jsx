@@ -3,13 +3,16 @@ import './Login.css';
 import clinicBg from '../assets/clinicbackground.png';
 import recruitmentBg from '../assets/recruitmentbackground.png';
 
-export default function Login({ onSwitchToRegister }) {
+const API_BASE = '/api/accounts';
+
+export default function Login({ onSwitchToRegister, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [serverError, setServerError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let hasError = false;
@@ -33,6 +36,30 @@ export default function Login({ onSwitchToRegister }) {
 
     if (hasError) return;
 
+    setServerError('');
+
+    try {
+      const response = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setServerError(data.message || 'Login failed.');
+        return;
+      }
+
+      if (onLoginSuccess) {
+        onLoginSuccess(data);
+      }
+    } 
+    
+    catch (err) {
+      setServerError('Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -42,6 +69,8 @@ export default function Login({ onSwitchToRegister }) {
         <div className="card p-4 shadow-sm" style={{ maxWidth: '380px' }}>
           <h4 className="fw-bold">Clinic Management System</h4>
           <p className="text-muted">Enter your credentials to access your account.</p>
+
+          {serverError && <div className="alert alert-danger py-2">{serverError}</div>}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3 text-start">
