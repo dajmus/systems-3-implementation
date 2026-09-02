@@ -5,5 +5,8 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001; app.use(cors());
 app.use(express.json());
+app.use('/api/accounts', accountsRouter);
+app.use('/api/schedule', require('./routes/schedule'));
+app.use('/api/appointments', require('./routes/appointments'));
 app.get('/', (req, res) => res.send('Backend running'));
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
