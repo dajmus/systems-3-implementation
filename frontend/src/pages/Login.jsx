@@ -8,6 +8,7 @@ const API_BASE = '/api/accounts';
 export default function Login({ onSwitchToRegister, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [serverError, setServerError] = useState('');
@@ -34,81 +35,218 @@ export default function Login({ onSwitchToRegister, onLoginSuccess }) {
       setPasswordError('');
     }
 
-    if (hasError) return;
+    if (hasError) {
+      return;
+    }
 
     setServerError('');
 
     try {
       const response = await fetch(`${API_BASE}/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setServerError(data.error || 'Login failed.');
+        setServerError(
+          data.error || 'Login failed.'
+        );
         return;
       }
 
+      /*
+       * The backend returns "userType".
+       * The rest of the frontend uses "accountType".
+       *
+       * Convert it here so the whole application
+       * consistently uses accountType.
+       */
+      const userData = {
+        ...data,
+        accountType: data.userType,
+      };
+
       if (onLoginSuccess) {
-        onLoginSuccess(data);
+        onLoginSuccess(userData);
       }
-    } 
-    
-    catch (err) {
-      setServerError('Something went wrong. Please try again.');
+
+    } catch (err) {
+      console.error('Login error:', err);
+
+      setServerError(
+        'Something went wrong. Please try again.'
+      );
     }
   };
 
-  return (
-<div className="min-vh-100 d-flex align-items-center justify-content-center position-relative overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
-  <img src={clinicBg} alt="" style={{ position: 'absolute', top: -80, left: -80, width: 380, pointerEvents: 'none' }} />
-  <img src={recruitmentBg} alt="" style={{ position: 'absolute', bottom: -60, right: -60, width: 380, pointerEvents: 'none' }} />      <div className="text-center">
-        <div className="card p-4 shadow-sm" style={{ maxWidth: '380px' }}>
-          <h4 className="fw-bold">Clinic Management System</h4>
-          <p className="text-muted">Enter your credentials to access your account.</p>
 
-          {serverError && <div className="alert alert-danger py-2">{serverError}</div>}
+  return (
+    <div
+      className="min-vh-100 d-flex align-items-center justify-content-center position-relative overflow-hidden"
+      style={{ backgroundColor: '#ffffff' }}
+    >
+
+      <img
+        src={clinicBg}
+        alt=""
+        style={{
+          position: 'absolute',
+          top: -80,
+          left: -80,
+          width: 380,
+          pointerEvents: 'none',
+        }}
+      />
+
+      <img
+        src={recruitmentBg}
+        alt=""
+        style={{
+          position: 'absolute',
+          bottom: -60,
+          right: -60,
+          width: 380,
+          pointerEvents: 'none',
+        }}
+      />
+
+
+      <div className="text-center">
+
+        <div
+          className="card p-4 shadow-sm"
+          style={{ maxWidth: '380px' }}
+        >
+
+          <h4 className="fw-bold">
+            Clinic Management System
+          </h4>
+
+          <p className="text-muted">
+            Enter your credentials to access your account.
+          </p>
+
+
+          {serverError && (
+            <div className="alert alert-danger py-2">
+              {serverError}
+            </div>
+          )}
+
 
           <form onSubmit={handleSubmit}>
+
             <div className="mb-3 text-start">
-              <label className="form-label">Email</label>
+
+              <label className="form-label">
+                Email
+              </label>
+
               <input
                 type="email"
-                className={`form-control ${emailError ? 'is-invalid' : ''}`}
+                className={`form-control ${
+                  emailError ? 'is-invalid' : ''
+                }`}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
               />
-              {emailError && <div className="invalid-feedback">{emailError}</div>}
+
+              {emailError && (
+                <div className="invalid-feedback">
+                  {emailError}
+                </div>
+              )}
+
             </div>
+
 
             <div className="mb-3 text-start">
-              <label className="form-label">Password</label>
+
+              <label className="form-label">
+                Password
+              </label>
+
               <input
                 type="password"
-                className={`form-control ${passwordError ? 'is-invalid' : ''}`}
+                className={`form-control ${
+                  passwordError ? 'is-invalid' : ''
+                }`}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
               />
-              {passwordError && <div className="invalid-feedback">{passwordError}</div>}
+
+              {passwordError && (
+                <div className="invalid-feedback">
+                  {passwordError}
+                </div>
+              )}
+
             </div>
+
 
             <div className="text-end mb-3">
-              <a href="#" className="linkpassword">Forgot password?</a>
+
+              <a
+                href="#"
+                className="linkpassword"
+                onClick={(e) =>
+                  e.preventDefault()
+                }
+              >
+                Forgot password?
+              </a>
+
             </div>
 
-            <button type="submit" className="btn loginbutton w-100 text-white">Log in</button>
+
+            <button
+              type="submit"
+              className="btn loginbutton w-100 text-white"
+            >
+              Log in
+            </button>
+
           </form>
 
+
           <hr />
-          <p>Don't have an account? <a href="#" className="linkregister fw-bold" onClick={(e) => { e.preventDefault(); onSwitchToRegister(); }}>Create account</a></p>
+
+          <p>
+            Don't have an account?{' '}
+
+            <a
+              href="#"
+              className="linkregister fw-bold"
+              onClick={(e) => {
+                e.preventDefault();
+                onSwitchToRegister();
+              }}
+            >
+              Create account
+            </a>
+          </p>
+
         </div>
+
+
         <p className="text-muted mt-3">
           © 2026 Clinic Management System
         </p>
+
       </div>
+
     </div>
   );
 }

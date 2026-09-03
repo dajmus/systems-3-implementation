@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './Register.css';
+
 import image1 from '../assets/image1.jpg';
 import image2 from '../assets/image2.jpg';
 import image3 from '../assets/image3.jpg';
 import image4 from '../assets/image4.png';
 import image5 from '../assets/image5.jpeg';
+
 import patientTeal from '../assets/patientbg.png';
 import doctorConsultationWhite from '../assets/consultationbg.png';
-import { Carousel } from 'bootstrap';
-import { useEffect, useRef } from 'react';
 
-const wheelImages = [image1, image2, image3, image4, image5];
+import { Carousel } from 'bootstrap';
+
+const wheelImages = [
+  image1,
+  image2,
+  image3,
+  image4,
+  image5
+];
+
 const TEXTBOX_WIDTH = '420px';
 const API_BASE = '/api/accounts';
 
@@ -19,33 +28,59 @@ export default function Register({ onSwitchToLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [contactInfo, setContactInfo] = useState('');
+
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [contactInfoError, setContactInfoError] = useState('');
+
   const [serverError, setServerError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [registering, setRegistering] = useState(false);
+
   const carouselRef = useRef(null);
 
   useEffect(() => {
     if (carouselRef.current) {
-      const carousel = new Carousel(carouselRef.current, { interval: 3000, ride: 'carousel' });
+      const carousel = new Carousel(
+        carouselRef.current,
+        {
+          interval: 3000,
+          ride: 'carousel'
+        }
+      );
+
       return () => carousel.dispose();
     }
   }, []);
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setServerError('');
+    setSuccessMessage('');
+
     let hasError = false;
 
-    if (!name) {
+
+    // -----------------------------------------------
+    // Name validation
+    // -----------------------------------------------
+
+    if (!name.trim()) {
       setNameError('Please enter your name.');
       hasError = true;
     } else {
       setNameError('');
     }
 
-    if (!email) {
+
+    // -----------------------------------------------
+    // Email validation
+    // -----------------------------------------------
+
+    if (!email.trim()) {
       setEmailError('Please enter your email address.');
       hasError = true;
     } else if (!email.includes('@')) {
@@ -55,112 +90,328 @@ export default function Register({ onSwitchToLogin }) {
       setEmailError('');
     }
 
+
+    // -----------------------------------------------
+    // Password validation
+    // -----------------------------------------------
+
     if (!password) {
       setPasswordError('Please enter a password.');
+      hasError = true;
+    } else if (password.length < 6) {
+      setPasswordError(
+        'Password must be at least 6 characters long.'
+      );
       hasError = true;
     } else {
       setPasswordError('');
     }
 
-    if (!contactInfo) {
-      setContactInfoError('Please enter your contact info.');
+
+    // -----------------------------------------------
+    // Contact validation
+    // -----------------------------------------------
+
+    if (!contactInfo.trim()) {
+      setContactInfoError(
+        'Please enter your contact information.'
+      );
       hasError = true;
     } else {
       setContactInfoError('');
     }
 
-    if (hasError) return;
 
-    setServerError('');
+    if (hasError) {
+      return;
+    }
+
+
+    // -----------------------------------------------
+    // Send registration request
+    // -----------------------------------------------
+
+    setRegistering(true);
 
     try {
-      const response = await fetch(`${API_BASE}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, contactInfo }),
-      });
+      const response = await fetch(
+        `${API_BASE}/register`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim(),
+            password,
+            contactInfo: contactInfo.trim()
+          })
+        }
+      );
 
       const data = await response.json();
 
+
       if (!response.ok) {
-        setServerError(data.message || 'Registration failed.');
+        setServerError(
+          data.message || 'Registration failed.'
+        );
         return;
       }
 
-      onSwitchToLogin();
-    } 
-    
-    catch (err) {
-      setServerError('Something went wrong. Please try again.');
+
+      // Registration succeeded
+      setSuccessMessage(
+        'Account created successfully. You can now log in.'
+      );
+
+      // Clear form
+      setName('');
+      setEmail('');
+      setPassword('');
+      setContactInfo('');
+
+      // Give the user a moment to see the success message
+      setTimeout(() => {
+        onSwitchToLogin();
+      }, 1200);
+
+    } catch (err) {
+      console.error('Registration request failed:', err);
+
+      setServerError(
+        'Could not connect to the server. Please try again.'
+      );
+
+    } finally {
+      setRegistering(false);
     }
   };
 
+
   return (
     <div className="min-vh-100 d-flex flex-wrap position-relative overflow-hidden">
-      <img src={patientTeal} alt="" style={{ position: 'absolute', bottom: -60, left: -60, width: 380, pointerEvents: 'none' }} />
-      <img src={doctorConsultationWhite} alt="" style={{ position: 'absolute', top: -60, right: -60, width: 380, pointerEvents: 'none' }} />
+
+      <img
+        src={patientTeal}
+        alt=""
+        style={{
+          position: 'absolute',
+          bottom: -60,
+          left: -60,
+          width: 380,
+          pointerEvents: 'none'
+        }}
+      />
+
+      <img
+        src={doctorConsultationWhite}
+        alt=""
+        style={{
+          position: 'absolute',
+          top: -60,
+          right: -60,
+          width: 380,
+          pointerEvents: 'none'
+        }}
+      />
+
+
+      {/* Registration form */}
 
       <div className="col-12 col-md-6 d-flex align-items-center justify-content-center bg-white py-5">
-        <div className="card p-4 shadow-sm" style={{ maxWidth: '380px' }}>
-          <h4 className="fw-bold">Create Account</h4>
-          <p className="text-muted">Register to access the clinic system.</p>
 
-          {serverError && <div className="alert alert-danger py-2">{serverError}</div>}
+        <div
+          className="card p-4 shadow-sm"
+          style={{
+            maxWidth: '380px'
+          }}
+        >
+
+          <h4 className="fw-bold">
+            Create Account
+          </h4>
+
+          <p className="text-muted">
+            Register to access the clinic system.
+          </p>
+
+
+          {serverError && (
+            <div className="alert alert-danger py-2">
+              {serverError}
+            </div>
+          )}
+
+
+          {successMessage && (
+            <div className="alert alert-success py-2">
+              {successMessage}
+            </div>
+          )}
+
 
           <form onSubmit={handleSubmit}>
+
+            {/* Name */}
+
             <div className="mb-3 text-start">
-              <label className="form-label">Name</label>
+
+              <label className="form-label">
+                Name
+              </label>
+
               <input
                 type="text"
-                className={`form-control ${nameError ? 'is-invalid' : ''}`}
+                className={`form-control ${
+                  nameError ? 'is-invalid' : ''
+                }`}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={registering}
               />
-              {nameError && <div className="invalid-feedback">{nameError}</div>}
+
+              {nameError && (
+                <div className="invalid-feedback">
+                  {nameError}
+                </div>
+              )}
+
             </div>
 
+
+            {/* Email */}
+
             <div className="mb-3 text-start">
-              <label className="form-label">Email</label>
+
+              <label className="form-label">
+                Email
+              </label>
+
               <input
                 type="email"
-                className={`form-control ${emailError ? 'is-invalid' : ''}`}
+                className={`form-control ${
+                  emailError ? 'is-invalid' : ''
+                }`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={registering}
               />
-              {emailError && <div className="invalid-feedback">{emailError}</div>}
+
+              {emailError && (
+                <div className="invalid-feedback">
+                  {emailError}
+                </div>
+              )}
+
             </div>
 
+
+            {/* Password */}
+
             <div className="mb-3 text-start">
-              <label className="form-label">Password</label>
+
+              <label className="form-label">
+                Password
+              </label>
+
               <input
                 type="password"
-                className={`form-control ${passwordError ? 'is-invalid' : ''}`}
+                className={`form-control ${
+                  passwordError ? 'is-invalid' : ''
+                }`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={registering}
               />
-              {passwordError && <div className="invalid-feedback">{passwordError}</div>}
+
+              {passwordError && (
+                <div className="invalid-feedback">
+                  {passwordError}
+                </div>
+              )}
+
+              {!passwordError && (
+                <div className="form-text">
+                  Password must be at least 6 characters.
+                </div>
+              )}
+
             </div>
+
+
+            {/* Contact */}
 
             <div className="mb-3 text-start">
-              <label className="form-label">Contact Info</label>
+
+              <label className="form-label">
+                Contact Info
+              </label>
+
               <input
                 type="text"
-                className={`form-control ${contactInfoError ? 'is-invalid' : ''}`}
+                className={`form-control ${
+                  contactInfoError ? 'is-invalid' : ''
+                }`}
                 value={contactInfo}
                 onChange={(e) => setContactInfo(e.target.value)}
+                disabled={registering}
               />
-              {contactInfoError && <div className="invalid-feedback">{contactInfoError}</div>}
+
+              {contactInfoError && (
+                <div className="invalid-feedback">
+                  {contactInfoError}
+                </div>
+              )}
+
             </div>
 
-            <button type="submit" className="btn registerbutton w-100 text-white">Register</button>
+
+            {/* Submit */}
+
+            <button
+              type="submit"
+              className="btn registerbutton w-100 text-white"
+              disabled={registering}
+            >
+              {registering ? 'Creating Account...' : 'Register'}
+            </button>
+
           </form>
 
+
           <hr />
-          <p>Already have an account? <a href="#" className="linklogin fw-bold" onClick={(e) => { e.preventDefault(); onSwitchToLogin(); }}>Login</a></p>
+
+          <p>
+            Already have an account?{' '}
+
+            <a
+              href="#"
+              className="linklogin fw-bold"
+              onClick={(e) => {
+                e.preventDefault();
+                onSwitchToLogin();
+              }}
+            >
+              Login
+            </a>
+          </p>
+
         </div>
+
       </div>
 
-      <div className="col-12 col-md-6 d-flex flex-column align-items-center justify-content-center text-white p-5" style={{ backgroundColor: '#0f6e73' }}>
+
+      {/* Information side */}
+
+      <div
+        className="col-12 col-md-6 d-flex flex-column align-items-center justify-content-center text-white p-5"
+        style={{
+          backgroundColor: '#0f6e73'
+        }}
+      >
+
         <div
           style={{
             width: '100%',
@@ -170,31 +421,99 @@ export default function Register({ onSwitchToLogin }) {
             borderRadius: '8px',
             padding: '28px',
             color: '#0b4a4d',
-            fontFamily: 'Georgia, serif',
+            fontFamily: 'Georgia, serif'
           }}
         >
-          <h2 className="fw-bold mb-3" style={{ fontSize: '2.1rem', color: '#0b4a4d' }}>
+
+          <h2
+            className="fw-bold mb-3"
+            style={{
+              fontSize: '2.1rem',
+              color: '#0b4a4d'
+            }}
+          >
             Why choose this system
           </h2>
-          <ul className="list-unstyled" style={{ fontSize: '1.35rem', lineHeight: '1.5' }}>
-            <li className="mb-3">See real appointment availability and book instantly, no phone calls back and forth.</li>
-            <li className="mb-3">One place for your prescriptions and billing, always up to date.</li>
-            <li className="mb-3">Your data is protected with hashed passwords and secure access controls.</li>
+
+          <ul
+            className="list-unstyled"
+            style={{
+              fontSize: '1.35rem',
+              lineHeight: '1.5'
+            }}
+          >
+
+            <li className="mb-3">
+              See real appointment availability and book instantly,
+              no phone calls back and forth.
+            </li>
+
+            <li className="mb-3">
+              One place for your prescriptions and billing,
+              always up to date.
+            </li>
+
+            <li className="mb-3">
+              Your data is protected with hashed passwords
+              and secure access controls.
+            </li>
+
           </ul>
+
         </div>
 
-        <div id="featureCarousel" ref={carouselRef} className="carousel slide" style={{ width: '100%', maxWidth: TEXTBOX_WIDTH, marginTop: '32px' }}>
+
+        <div
+          id="featureCarousel"
+          ref={carouselRef}
+          className="carousel slide"
+          style={{
+            width: '100%',
+            maxWidth: TEXTBOX_WIDTH,
+            marginTop: '32px'
+          }}
+        >
+
           <div className="carousel-inner">
+
             {wheelImages.map((img, idx) => (
-              <div className={`carousel-item ${idx === 0 ? 'active' : ''}`} key={idx}>
-                <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src={img} alt={`feature ${idx + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+              <div
+                className={`carousel-item ${
+                  idx === 0 ? 'active' : ''
+                }`}
+                key={idx}
+              >
+
+                <div
+                  style={{
+                    height: '240px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+
+                  <img
+                    src={img}
+                    alt={`feature ${idx + 1}`}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain'
+                    }}
+                  />
+
                 </div>
+
               </div>
             ))}
+
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 }
