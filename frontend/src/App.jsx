@@ -3,19 +3,36 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import BookAppointment from './pages/BookAppointment';
+import MyAppointments from './pages/MyAppointments';
 
 function AppContent() {
   const [view, setView] = useState('login');
+  const [patientTab, setPatientTab] = useState('book');
   const { user, login, logout } = useAuth();
 
   if (user) {
     if (user.accountType === 'patient') {
       return (
         <div>
-          <div className="d-flex justify-content-end p-3">
+          <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
+            <div>
+              <button
+                className={`btn btn-sm me-2 ${patientTab === 'book' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setPatientTab('book')}
+              >
+                Book Appointment
+              </button>
+              <button
+                className={`btn btn-sm ${patientTab === 'mine' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setPatientTab('mine')}
+              >
+                My Appointments
+              </button>
+            </div>
             <button className="btn btn-outline-secondary btn-sm" onClick={logout}>Log out</button>
           </div>
-          <BookAppointment />
+
+          {patientTab === 'book' ? <BookAppointment /> : <MyAppointments />}
         </div>
       );
     }
