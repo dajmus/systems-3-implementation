@@ -2,12 +2,24 @@ import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import BookAppointment from './pages/BookAppointment';
 
 function AppContent() {
   const [view, setView] = useState('login');
   const { user, login, logout } = useAuth();
 
   if (user) {
+    if (user.accountType === 'patient') {
+      return (
+        <div>
+          <div className="d-flex justify-content-end p-3">
+            <button className="btn btn-outline-secondary btn-sm" onClick={logout}>Log out</button>
+          </div>
+          <BookAppointment />
+        </div>
+      );
+    }
+
     return (
       <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center">
         <h3>Logged in as {user.name || user.email}</h3>
