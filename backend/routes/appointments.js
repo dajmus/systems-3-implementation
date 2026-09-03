@@ -26,7 +26,6 @@ router.post('/', async (req, res) => {
 
     if (slotRows.length === 0 || slotRows[0].slot_status !== 'available') {
       await connection.rollback();
-
       return res.status(400).json({
         message: 'This slot is no longer available.'
       });
@@ -36,12 +35,7 @@ router.post('/', async (req, res) => {
       `INSERT INTO Appointment
        (patient_id, doctor_id, staff_id, date_and_time, status)
        VALUES (?, ?, ?, ?, 'pending')`,
-      [
-        patient_id,
-        doctor_id,
-        staff_id,
-        slotRows[0].date_and_time
-      ]
+      [patient_id, doctor_id, staff_id, slotRows[0].date_and_time]
     );
 
     await connection.query(
@@ -56,7 +50,6 @@ router.post('/', async (req, res) => {
     res.status(201).json({
       appointment_id: result.insertId
     });
-
   } catch (err) {
     console.error('POST /api/appointments error:', err);
 
@@ -69,20 +62,22 @@ router.post('/', async (req, res) => {
     res.status(500).json({
       message: 'Could not book appointment.'
     });
-
   } finally {
     connection.release();
   }
 });
 
-
 router.get('/patient/:patientId', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT Appointment.appointment_id,
-              Appointment.date_and_time,
-              Appointment.status,
-              Staff.name AS doctor_name
+      `SELECT
+         Appointment.appointment_id,
+         Appointment.patient_id,
+         Appointment.doctor_id,
+         Appointment.staff_id,
+         Appointment.date_and_time,
+         Appointment.status,
+         Staff.name AS doctor_name
        FROM Appointment
        JOIN Doctor
          ON Appointment.doctor_id = Doctor.doctor_id
@@ -94,7 +89,6 @@ router.get('/patient/:patientId', async (req, res) => {
     );
 
     res.json(rows);
-
   } catch (err) {
     console.error('GET /api/appointments/patient error:', err);
 
@@ -104,15 +98,18 @@ router.get('/patient/:patientId', async (req, res) => {
   }
 });
 
-
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT Appointment.appointment_id,
-              Appointment.date_and_time,
-              Appointment.status,
-              Patient.name AS patient_name,
-              Staff.name AS doctor_name
+      `SELECT
+         Appointment.appointment_id,
+         Appointment.patient_id,
+         Appointment.doctor_id,
+         Appointment.staff_id,
+         Appointment.date_and_time,
+         Appointment.status,
+         Patient.name AS patient_name,
+         Staff.name AS doctor_name
        FROM Appointment
        JOIN Patient
          ON Appointment.patient_id = Patient.patient_id
@@ -124,7 +121,6 @@ router.get('/', async (req, res) => {
     );
 
     res.json(rows);
-
   } catch (err) {
     console.error('GET /api/appointments error:', err);
 
@@ -133,7 +129,6 @@ router.get('/', async (req, res) => {
     });
   }
 });
-
 
 router.put('/:id/cancel', async (req, res) => {
   const connection = await pool.getConnection();
@@ -161,7 +156,6 @@ router.put('/:id/cancel', async (req, res) => {
     res.json({
       message: 'Appointment cancelled.'
     });
-
   } catch (err) {
     console.error('PUT /api/appointments/:id/cancel error:', err);
 
@@ -174,11 +168,9 @@ router.put('/:id/cancel', async (req, res) => {
     res.status(500).json({
       message: 'Could not cancel appointment.'
     });
-
   } finally {
     connection.release();
   }
 });
-
 
 module.exports = router;

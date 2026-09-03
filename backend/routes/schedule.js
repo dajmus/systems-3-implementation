@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 
-
-// GET available appointment slots
 router.get('/available', async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -23,51 +21,112 @@ router.get('/available', async (req, res) => {
     );
 
     res.json(rows);
-
   } catch (err) {
     console.error('GET /api/schedule/available error:', err);
-
     res.status(500).json({
       message: 'Could not load schedule.'
     });
   }
 });
 
-
-// CREATE a new available schedule slot
 router.post('/', async (req, res) => {
-  const { staff_id, date_and_time } = req.body;
+  const { staff_id, date, start_time, end_time } = req.body;
 
-  if (!staff_id || !date_and_time) {
+  if (!staff_id || !date || !start_time || !end_time) {
     return res.status(400).json({
-      message: 'staff_id and date_and_time are required.'
+      message: 'staff_id, date, start_time, and end_time are required.'
     });
   }
 
+  const start = new Date(`${date}T${start_time}:00`);
+  const end = new Date(`${date}T${end_time}:00`);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return res.status(400).json({
+      message: 'Invalid date or time.'
+    });
+  }
+
+  if (end <= start) {
+    return res.status(400).json({
+      message: 'End time must be after start time.'
+    });
+  }
+
+  const slots = [];
+  const current = new Date(start);
+
+  while (current < end) {
+    const year = current.getFullYear();
+    const month = String(current.getMonth() + 1).padStart(2, '0');
+    const day = String(current.getDate()).padStart(2, '0');
+    const hours = String(current.getHours()).padStart(2, '0');
+    const minutes = String(current.getMinutes()).padStart(2, '0');
+
+    slots.push(`${year}-${month}-${day} ${hours}:${minutes}:00`);
+    current.setMinutes(current.getMinutes() + 30);
+  }
+
   try {
-    const [result] = await pool.query(
+    const [existingRows] = await pool.query(
+      `SELECT date_and_time
+       FROM Schedule
+       WHERE staff_id = ?
+       AND date_and_time >= ?
+       AND date_and_time < ?`,
+      [
+        staff_id,
+        `${date} ${start_time}:00`,
+        `${date} ${end_time}:00`
+      ]
+    );
+
+    const existingTimes = new Set(
+      existingRows.map((row) => {
+        const value = new Date(row.date_and_time);
+        const year = value.getFullYear();
+        const month = String(value.getMonth() + 1).padStart(2, '0');
+        const day = String(value.getDate()).padStart(2, '0');
+        const hours = String(value.getHours()).padStart(2, '0');
+        const minutes = String(value.getMinutes()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:00`;
+      })
+    );
+
+    const newSlots = slots.filter((slot) => !existingTimes.has(slot));
+
+    if (newSlots.length === 0) {
+      return res.status(400).json({
+        message: 'All slots in this time range already exist.'
+      });
+    }
+
+    const values = newSlots.map((slot) => [
+      staff_id,
+      slot,
+      'available'
+    ]);
+
+    await pool.query(
       `INSERT INTO Schedule
        (staff_id, date_and_time, slot_status)
-       VALUES (?, ?, 'available')`,
-      [staff_id, date_and_time]
+       VALUES ?`,
+      [values]
     );
 
     res.status(201).json({
-      slot_id: result.insertId,
-      message: 'Schedule slot created.'
+      message: `${newSlots.length} appointment slots created.`,
+      slots_created: newSlots.length
     });
-
   } catch (err) {
     console.error('POST /api/schedule error:', err);
-
     res.status(500).json({
-      message: 'Could not create slot.'
+      message: 'Could not create slots.'
     });
   }
 });
 
-
-// DELETE an available schedule slot
 router.delete('/:id', async (req, res) => {
   try {
     const [result] = await pool.query(
@@ -86,15 +145,12 @@ router.delete('/:id', async (req, res) => {
     res.json({
       message: 'Slot removed.'
     });
-
   } catch (err) {
     console.error('DELETE /api/schedule/:id error:', err);
-
     res.status(500).json({
       message: 'Could not remove slot.'
     });
   }
 });
-
 
 module.exports = router;

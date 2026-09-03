@@ -12,7 +12,10 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
   const { user } = useAuth();
 
   const [appointments, setAppointments] = useState([]);
-  const [dateTime, setDateTime] = useState('');
+  const [slots, setSlots] = useState([]);
+  const [slotDate, setSlotDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [message, setMessage] = useState('');
 
   const [rxAppointmentId, setRxAppointmentId] = useState(null);
@@ -25,6 +28,7 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
 
   useEffect(() => {
     loadAppointments();
+    loadSlots();
   }, []);
 
   const loadAppointments = async () => {
@@ -44,12 +48,33 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
     }
   };
 
-  const addSlot = async (e) => {
+  const loadSlots = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/schedule/available`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message || 'Could not load appointment slots.');
+        return;
+      }
+
+      const doctorSlots = Array.isArray(data)
+        ? data.filter((slot) => Number(slot.staff_id) === Number(user.staff_id))
+        : [];
+
+      setSlots(doctorSlots);
+    } catch (err) {
+      setMessage('Could not load appointment slots.');
+      setSlots([]);
+    }
+  };
+
+  const addSlots = async (e) => {
     e.preventDefault();
     setMessage('');
 
-    if (!dateTime) {
-      setMessage('Please pick a date and time.');
+    if (!slotDate || !startTime || !endTime) {
+      setMessage('Please select a date, start time and end time.');
       return;
     }
 
@@ -57,24 +82,50 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
       const response = await fetch(`${API_BASE}/schedule`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           staff_id: user.staff_id,
-          date_and_time: dateTime,
-        }),
+          date: slotDate,
+          start_time: startTime,
+          end_time: endTime
+        })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || 'Could not add slot.');
+        setMessage(data.message || 'Could not add appointment slots.');
         return;
       }
 
-      setMessage('Appointment slot added successfully.');
-      setDateTime('');
-      loadAppointments();
+      setMessage(data.message || 'Appointment slots added successfully.');
+      setSlotDate('');
+      setStartTime('');
+      setEndTime('');
+      loadSlots();
+    } catch (err) {
+      setMessage('Something went wrong. Please try again.');
+    }
+  };
+
+  const removeSlot = async (slotId) => {
+    setMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE}/schedule/${slotId}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message || 'Could not remove slot.');
+        return;
+      }
+
+      setMessage('Appointment slot removed.');
+      loadSlots();
     } catch (err) {
       setMessage('Something went wrong. Please try again.');
     }
@@ -90,15 +141,15 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
       const response = await fetch(`${API_BASE}/prescriptions`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           patient_id: appt.patient_id,
           doctor_id: appt.doctor_id,
           diagnosis,
           medication,
-          instructions,
-        }),
+          instructions
+        })
       });
 
       const data = await response.json();
@@ -109,7 +160,6 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
       }
 
       setMessage('Prescription issued successfully.');
-
       setRxAppointmentId(null);
       setDiagnosis('');
       setMedication('');
@@ -129,12 +179,12 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
       const response = await fetch(`${API_BASE}/billing`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           patient_id: appt.patient_id,
-          amount,
-        }),
+          amount
+        })
       });
 
       const data = await response.json();
@@ -145,7 +195,6 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
       }
 
       setMessage('Bill issued successfully.');
-
       setBillAppointmentId(null);
       setAmount('');
     } catch (err) {
@@ -160,13 +209,12 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit',
+      minute: '2-digit'
     });
   };
 
   return (
     <main className="staff-page">
-
       <img
         src={clinicBg}
         alt=""
@@ -180,9 +228,7 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
       />
 
       <nav className="staff-navbar">
-
         <div className="staff-navbar-left">
-
           <button
             type="button"
             className={`btn staff-nav-button ${activeTab === 'schedule' ? 'staff-nav-active' : ''}`}
@@ -198,7 +244,6 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
           >
             Services
           </button>
-
         </div>
 
         <button
@@ -208,16 +253,13 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
         >
           Log out
         </button>
-
       </nav>
 
       {activeTab === 'catalog' ? (
         <Catalog />
       ) : (
         <div className="staff-content">
-
           <header className="text-center staff-header">
-
             <h1 className="fw-bold">
               Staff Dashboard
             </h1>
@@ -225,9 +267,7 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
             <p className="text-muted">
               Manage appointments, prescriptions and patient billing.
             </p>
-
           </header>
-
 
           {message && (
             <div className="alert alert-info mb-4">
@@ -235,68 +275,137 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
             </div>
           )}
 
-
           {user.role === 'doctor' && (
-            <section className="card border-0 shadow-sm staff-card">
+            <>
+              <section className="card border-0 shadow-sm staff-card">
+                <div className="text-center">
+                  <h2 className="h4 fw-bold">
+                    Add appointment slots
+                  </h2>
 
-              <div className="text-center">
-
-                <h2 className="h4 fw-bold">
-                  Add appointment slot
-                </h2>
-
-                <p className="text-muted">
-                  Create an available time slot for patients.
-                </p>
-
-              </div>
-
-              <form onSubmit={addSlot}>
-
-                <div className="row align-items-end">
-
-                  <div className="col">
-
-                    <label
-                      htmlFor="appointment-date"
-                      className="form-label"
-                    >
-                      Date and time
-                    </label>
-
-                    <input
-                      id="appointment-date"
-                      type="datetime-local"
-                      className="form-control"
-                      value={dateTime}
-                      onChange={(e) => setDateTime(e.target.value)}
-                    />
-
-                  </div>
-
-                  <div className="col-auto">
-
-                    <button
-                      type="submit"
-                      className="btn staff-button-primary"
-                    >
-                      Add slot
-                    </button>
-
-                  </div>
-
+                  <p className="text-muted">
+                    Create 30-minute appointment slots for a selected time range.
+                  </p>
                 </div>
 
-              </form>
+                <form onSubmit={addSlots}>
+                  <div className="row g-3 align-items-end">
+                    <div className="col-md-4">
+                      <label
+                        htmlFor="appointment-date"
+                        className="form-label"
+                      >
+                        Date
+                      </label>
 
-            </section>
+                      <input
+                        id="appointment-date"
+                        type="date"
+                        className="form-control"
+                        value={slotDate}
+                        onChange={(e) => setSlotDate(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="col-md-3">
+                      <label
+                        htmlFor="start-time"
+                        className="form-label"
+                      >
+                        Start time
+                      </label>
+
+                      <input
+                        id="start-time"
+                        type="time"
+                        className="form-control"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="col-md-3">
+                      <label
+                        htmlFor="end-time"
+                        className="form-label"
+                      >
+                        End time
+                      </label>
+
+                      <input
+                        id="end-time"
+                        type="time"
+                        className="form-control"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="col-md-2">
+                      <button
+                        type="submit"
+                        className="btn staff-button-primary w-100"
+                      >
+                        Add slots
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </section>
+
+              <section className="appointments-section">
+                <div className="text-center">
+                  <h2 className="fw-bold">
+                    Available Appointment Slots
+                  </h2>
+
+                  <p className="text-muted">
+                    {slots.length} available slots
+                  </p>
+                </div>
+
+                {slots.length === 0 && (
+                  <div className="text-center text-muted mb-4">
+                    No available slots.
+                  </div>
+                )}
+
+                {slots.map((slot) => (
+                  <article
+                    key={slot.slot_id}
+                    className="card border-0 shadow-sm appointment-card"
+                  >
+                    <div className="text-center">
+                      <div className="fw-bold">
+                        {formatDate(slot.date_and_time)}
+                      </div>
+
+                      <div className="text-muted">
+                        Available for patients
+                      </div>
+                    </div>
+
+                    <div className="appointment-actions">
+                      <span className="badge rounded-pill status-badge">
+                        available
+                      </span>
+
+                      <button
+                        type="button"
+                        className="btn btn-sm staff-button-outline"
+                        onClick={() => removeSlot(slot.slot_id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </section>
+            </>
           )}
 
-
           <section className="appointments-section">
-
             <div className="text-center">
-
               <h2 className="fw-bold">
                 Appointments
               </h2>
@@ -304,19 +413,20 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
               <p className="text-muted">
                 {appointments.length} appointments
               </p>
-
             </div>
 
+            {appointments.length === 0 && (
+              <div className="text-center text-muted">
+                No appointments yet.
+              </div>
+            )}
 
             {appointments.map((appt) => (
-
               <article
                 key={appt.appointment_id}
                 className="card border-0 shadow-sm appointment-card"
               >
-
                 <div className="text-center">
-
                   <div className="fw-bold">
                     {formatDate(appt.date_and_time)}
                   </div>
@@ -328,12 +438,9 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
                   <div className="text-muted">
                     with Dr. {appt.doctor_name}
                   </div>
-
                 </div>
 
-
                 <div className="appointment-actions">
-
                   <span className="badge rounded-pill status-badge">
                     {appt.status}
                   </span>
@@ -367,13 +474,10 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
                   >
                     Issue bill
                   </button>
-
                 </div>
-
 
                 {rxAppointmentId === appt.appointment_id && (
                   <div className="expand-panel">
-
                     <input
                       type="text"
                       className="form-control mb-2"
@@ -405,14 +509,11 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
                     >
                       Save prescription
                     </button>
-
                   </div>
                 )}
 
-
                 {billAppointmentId === appt.appointment_id && (
                   <div className="expand-panel">
-
                     <input
                       type="number"
                       min="0"
@@ -430,19 +531,13 @@ export default function StaffSchedule({ activeTab = 'schedule', onNavigate, onLo
                     >
                       Save bill
                     </button>
-
                   </div>
                 )}
-
               </article>
-
             ))}
-
           </section>
-
         </div>
       )}
-
     </main>
   );
 }
