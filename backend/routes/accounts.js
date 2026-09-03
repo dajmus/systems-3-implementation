@@ -1,3 +1,8 @@
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcryptjs');
+const pool = require('../config/db');
+
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -83,3 +88,5 @@ router.post('/login', async (req, res) => {
     });
   }
 });
+
+module.exports = router;

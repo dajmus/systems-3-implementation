@@ -1,0 +1,61 @@
+.patient-page {
+  min-height: 100vh;
+  background-color: #0f6e73;
+  padding: 3rem 1.5rem;
+}
+
+.patient-card {
+  max-width: 700px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.patient-card h4 {
+  color: #0f6e73;
+}
+
+.patient-alert {
+  background-color: #e6f1f1;
+  border: 1px solid #0f6e73;
+  color: #0c5a5e;
+  border-radius: 8px;
+}
+
+.patient-list-item {
+  background-color: #ffffff;
+  border: 1px solid #e2e8e8;
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.6rem;
+}
+
+.patient-time {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.patient-doctor {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.btn-teal-outline {
+  border-color: #0f6e73;
+  color: #0f6e73;
+  background-color: transparent;
+}
+
+.btn-teal-outline:hover {
+  background-color: #0f6e73;
+  border-color: #0f6e73;
+  color: #ffffff;
+}
+
+.patient-empty {
+  color: #6c757d;
+  text-align: center;
+  padding: 1.5rem 0;
+}
