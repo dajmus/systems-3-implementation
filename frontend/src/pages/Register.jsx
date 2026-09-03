@@ -9,7 +9,6 @@ import image5 from '../assets/image5.jpeg';
 
 import patientTeal from '../assets/patientbg.png';
 import doctorConsultationWhite from '../assets/consultationbg.png';
-
 import { Carousel } from 'bootstrap';
 
 const wheelImages = [
@@ -42,18 +41,14 @@ export default function Register({ onSwitchToLogin }) {
 
   useEffect(() => {
     if (carouselRef.current) {
-      const carousel = new Carousel(
-        carouselRef.current,
-        {
-          interval: 3000,
-          ride: 'carousel'
-        }
-      );
+      const carousel = new Carousel(carouselRef.current, {
+        interval: 3000,
+        ride: 'carousel'
+      });
 
       return () => carousel.dispose();
     }
   }, []);
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,22 +58,12 @@ export default function Register({ onSwitchToLogin }) {
 
     let hasError = false;
 
-
-    // -----------------------------------------------
-    // Name validation
-    // -----------------------------------------------
-
     if (!name.trim()) {
       setNameError('Please enter your name.');
       hasError = true;
     } else {
       setNameError('');
     }
-
-
-    // -----------------------------------------------
-    // Email validation
-    // -----------------------------------------------
 
     if (!email.trim()) {
       setEmailError('Please enter your email address.');
@@ -89,11 +74,6 @@ export default function Register({ onSwitchToLogin }) {
     } else {
       setEmailError('');
     }
-
-
-    // -----------------------------------------------
-    // Password validation
-    // -----------------------------------------------
 
     if (!password) {
       setPasswordError('Please enter a password.');
@@ -107,11 +87,6 @@ export default function Register({ onSwitchToLogin }) {
       setPasswordError('');
     }
 
-
-    // -----------------------------------------------
-    // Contact validation
-    // -----------------------------------------------
-
     if (!contactInfo.trim()) {
       setContactInfoError(
         'Please enter your contact information.'
@@ -121,37 +96,27 @@ export default function Register({ onSwitchToLogin }) {
       setContactInfoError('');
     }
 
-
     if (hasError) {
       return;
     }
 
-
-    // -----------------------------------------------
-    // Send registration request
-    // -----------------------------------------------
-
     setRegistering(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE}/register`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: name.trim(),
-            email: email.trim(),
-            password,
-            contactInfo: contactInfo.trim()
-          })
-        }
-      );
+      const response = await fetch(`${API_BASE}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+          contactInfo: contactInfo.trim()
+        })
+      });
 
       const data = await response.json();
-
 
       if (!response.ok) {
         setServerError(
@@ -160,39 +125,31 @@ export default function Register({ onSwitchToLogin }) {
         return;
       }
 
-
-      // Registration succeeded
       setSuccessMessage(
         'Account created successfully. You can now log in.'
       );
 
-      // Clear form
       setName('');
       setEmail('');
       setPassword('');
       setContactInfo('');
 
-      // Give the user a moment to see the success message
       setTimeout(() => {
         onSwitchToLogin();
       }, 1200);
-
     } catch (err) {
       console.error('Registration request failed:', err);
 
       setServerError(
         'Could not connect to the server. Please try again.'
       );
-
     } finally {
       setRegistering(false);
     }
   };
 
-
   return (
     <div className="min-vh-100 d-flex flex-wrap position-relative overflow-hidden">
-
       <img
         src={patientTeal}
         alt=""
@@ -217,18 +174,13 @@ export default function Register({ onSwitchToLogin }) {
         }}
       />
 
-
-      {/* Registration form */}
-
       <div className="col-12 col-md-6 d-flex align-items-center justify-content-center bg-white py-5">
-
         <div
           className="card p-4 shadow-sm"
           style={{
             maxWidth: '380px'
           }}
         >
-
           <h4 className="fw-bold">
             Create Account
           </h4>
@@ -237,13 +189,11 @@ export default function Register({ onSwitchToLogin }) {
             Register to access the clinic system.
           </p>
 
-
           {serverError && (
             <div className="alert alert-danger py-2">
               {serverError}
             </div>
           )}
-
 
           {successMessage && (
             <div className="alert alert-success py-2">
@@ -251,13 +201,8 @@ export default function Register({ onSwitchToLogin }) {
             </div>
           )}
 
-
           <form onSubmit={handleSubmit}>
-
-            {/* Name */}
-
             <div className="mb-3 text-start">
-
               <label className="form-label">
                 Name
               </label>
@@ -277,14 +222,9 @@ export default function Register({ onSwitchToLogin }) {
                   {nameError}
                 </div>
               )}
-
             </div>
 
-
-            {/* Email */}
-
             <div className="mb-3 text-start">
-
               <label className="form-label">
                 Email
               </label>
@@ -304,14 +244,9 @@ export default function Register({ onSwitchToLogin }) {
                   {emailError}
                 </div>
               )}
-
             </div>
 
-
-            {/* Password */}
-
             <div className="mb-3 text-start">
-
               <label className="form-label">
                 Password
               </label>
@@ -337,14 +272,9 @@ export default function Register({ onSwitchToLogin }) {
                   Password must be at least 6 characters.
                 </div>
               )}
-
             </div>
 
-
-            {/* Contact */}
-
             <div className="mb-3 text-start">
-
               <label className="form-label">
                 Contact Info
               </label>
@@ -364,11 +294,7 @@ export default function Register({ onSwitchToLogin }) {
                   {contactInfoError}
                 </div>
               )}
-
             </div>
-
-
-            {/* Submit */}
 
             <button
               type="submit"
@@ -377,9 +303,7 @@ export default function Register({ onSwitchToLogin }) {
             >
               {registering ? 'Creating Account...' : 'Register'}
             </button>
-
           </form>
-
 
           <hr />
 
@@ -397,13 +321,8 @@ export default function Register({ onSwitchToLogin }) {
               Login
             </a>
           </p>
-
         </div>
-
       </div>
-
-
-      {/* Information side */}
 
       <div
         className="col-12 col-md-6 d-flex flex-column align-items-center justify-content-center text-white p-5"
@@ -411,7 +330,6 @@ export default function Register({ onSwitchToLogin }) {
           backgroundColor: '#0f6e73'
         }}
       >
-
         <div
           style={{
             width: '100%',
@@ -424,7 +342,6 @@ export default function Register({ onSwitchToLogin }) {
             fontFamily: 'Georgia, serif'
           }}
         >
-
           <h2
             className="fw-bold mb-3"
             style={{
@@ -432,7 +349,7 @@ export default function Register({ onSwitchToLogin }) {
               color: '#0b4a4d'
             }}
           >
-            Why choose this system
+            Why choose this system?
           </h2>
 
           <ul
@@ -442,7 +359,6 @@ export default function Register({ onSwitchToLogin }) {
               lineHeight: '1.5'
             }}
           >
-
             <li className="mb-3">
               See real appointment availability and book instantly,
               no phone calls back and forth.
@@ -457,11 +373,8 @@ export default function Register({ onSwitchToLogin }) {
               Your data is protected with hashed passwords
               and secure access controls.
             </li>
-
           </ul>
-
         </div>
-
 
         <div
           id="featureCarousel"
@@ -473,9 +386,7 @@ export default function Register({ onSwitchToLogin }) {
             marginTop: '32px'
           }}
         >
-
           <div className="carousel-inner">
-
             {wheelImages.map((img, idx) => (
               <div
                 className={`carousel-item ${
@@ -483,7 +394,6 @@ export default function Register({ onSwitchToLogin }) {
                 }`}
                 key={idx}
               >
-
                 <div
                   style={{
                     height: '240px',
@@ -492,7 +402,6 @@ export default function Register({ onSwitchToLogin }) {
                     justifyContent: 'center'
                   }}
                 >
-
                   <img
                     src={img}
                     alt={`feature ${idx + 1}`}
@@ -502,18 +411,12 @@ export default function Register({ onSwitchToLogin }) {
                       objectFit: 'contain'
                     }}
                   />
-
                 </div>
-
               </div>
             ))}
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }
