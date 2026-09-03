@@ -14,12 +14,30 @@ export default function MyAppointments() {
   }, []);
 
   const loadAppointments = async () => {
-    const response = await fetch(`${API_BASE}/appointments/patient/${user.patient_id}`);
-    const data = await response.json();
-    setAppointments(data);
+    try {
+      const response = await fetch(`${API_BASE}/appointments/patient/${user.patient_id}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message || 'Could not load appointments.');
+        return;
+      }
+
+      setAppointments(data);
+    } catch (err) {
+      setMessage('Could not load appointments.');
+    }
   };
 
   const cancelAppointment = async (appointmentId) => {
+    const confirmed = window.confirm(
+      'Are you sure you want to cancel this appointment?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     setMessage('');
 
     try {
@@ -62,9 +80,16 @@ export default function MyAppointments() {
                 <div className="patient-time">
                   {new Date(appt.date_and_time).toLocaleString()}
                 </div>
-                <div className="patient-doctor">Dr. {appt.doctor_name}</div>
-                <span className="badge patient-status-badge">{appt.status}</span>
+
+                <div className="patient-doctor">
+                  Dr. {appt.doctor_name}
+                </div>
+
+                <span className="badge patient-status-badge">
+                  {appt.status}
+                </span>
               </div>
+
               {appt.status !== 'cancelled' && (
                 <button
                   className="btn btn-cancel btn-sm"

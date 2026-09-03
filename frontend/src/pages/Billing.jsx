@@ -15,22 +15,36 @@ export default function Billing() {
   }, []);
 
   const loadBills = async () => {
-    const response = await fetch(`${API_BASE}/billing/patient/${user.patient_id}`);
-    const data = await response.json();
-    setBills(data);
+    try {
+      const response = await fetch(`${API_BASE}/billing/patient/${user.patient_id}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message || 'Could not load bills.');
+        return;
+      }
+
+      setBills(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setMessage('Could not load bills.');
+    }
   };
 
   const payBill = async (billId) => {
     if (!paymentMethod) {
-      setMessage('Please enter a payment method.');
+      setMessage('Please select a payment method.');
       return;
     }
 
     try {
       const response = await fetch(`${API_BASE}/billing/${billId}/pay`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_method: paymentMethod }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          payment_method: paymentMethod
+        })
       });
 
       const data = await response.json();
@@ -50,50 +64,210 @@ export default function Billing() {
   };
 
   return (
-    <div className="container py-5">
-      <h4 className="fw-bold mb-3">Billing</h4>
+    <div
+      style={{
+        minHeight: 'calc(100vh - 73px)',
+        backgroundColor: '#28777b',
+        padding: '48px 24px'
+      }}
+    >
+      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <h1
+            style={{
+              color: '#ffffff',
+              fontSize: '32px',
+              fontWeight: '700',
+              marginBottom: '8px'
+            }}
+          >
+            Billing
+          </h1>
 
-      {message && <div className="alert alert-info py-2">{message}</div>}
+          <p
+            style={{
+              color: '#ffffff',
+              fontSize: '18px',
+              margin: 0
+            }}
+          >
+            View and pay your clinic bills.
+          </p>
+        </div>
 
-      {bills.length === 0 && <p className="text-muted">No bills yet.</p>}
+        {message && (
+          <div
+            className="alert alert-info"
+            style={{
+              maxWidth: '700px',
+              margin: '0 auto 25px'
+            }}
+          >
+            {message}
+          </div>
+        )}
 
-      <div className="list-group">
+        {bills.length === 0 && !message && (
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '7px',
+              padding: '25px',
+              textAlign: 'center'
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                color: '#666666',
+                fontSize: '17px'
+              }}
+            >
+              No bills yet.
+            </p>
+          </div>
+        )}
+
         {bills.map((bill) => (
-          <div key={bill.bill_id} className="list-group-item">
-            <div className="d-flex justify-content-between align-items-center">
-              <div>${bill.amount}</div>
+          <div
+            key={bill.bill_id}
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '7px',
+              padding: '22px',
+              marginBottom: '16px'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '15px'
+              }}
+            >
               <div>
-                <span className={`badge me-2 ${bill.status === 'paid' ? 'bg-success' : 'bg-warning text-dark'}`}>
+                <div
+                  style={{
+                    fontSize: '21px',
+                    fontWeight: '700',
+                    color: '#111111',
+                    marginBottom: '5px'
+                  }}
+                >
+                  ${Number(bill.amount).toFixed(2)}
+                </div>
+
+                <div
+                  style={{
+                    color: '#666666',
+                    fontSize: '16px'
+                  }}
+                >
+                  Bill #{bill.bill_id}
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '5px 10px',
+                    borderRadius: '20px',
+                    backgroundColor: '#28777b',
+                    color: '#ffffff',
+                    fontSize: '14px',
+                    marginBottom: '8px'
+                  }}
+                >
                   {bill.status}
                 </span>
+
                 {bill.status === 'unpaid' && (
-                  <button
-                    className="btn btn-outline-primary btn-sm"
-                    onClick={() => setPayingBillId(payingBillId === bill.bill_id ? null : bill.bill_id)}
-                  >
-                    Pay now
-                  </button>
+                  <div>
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{
+                        backgroundColor: '#28777b',
+                        color: '#ffffff',
+                        border: '1px solid #28777b'
+                      }}
+                      onClick={() =>
+                        setPayingBillId(
+                          payingBillId === bill.bill_id
+                            ? null
+                            : bill.bill_id
+                        )
+                      }
+                    >
+                      Pay now
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
 
             {bill.status === 'paid' && (
-              <div className="text-muted small mt-1">
+              <div
+                style={{
+                  color: '#666666',
+                  fontSize: '16px',
+                  marginTop: '12px'
+                }}
+              >
                 Paid on {bill.payment_date} via {bill.payment_method}
               </div>
             )}
 
             {payingBillId === bill.bill_id && (
-              <div className="mt-3 d-flex gap-2">
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{ maxWidth: '220px' }}
-                  placeholder="Payment method (e.g. Visa ending 4417)"
+              <div
+                style={{
+                  marginTop: '20px',
+                  paddingTop: '20px',
+                  borderTop: '1px solid #dddddd'
+                }}
+              >
+                <label
+                  htmlFor={`payment-${bill.bill_id}`}
+                  style={{
+                    display: 'block',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    color: '#111111'
+                  }}
+                >
+                  Payment method
+                </label>
+
+                <select
+                  id={`payment-${bill.bill_id}`}
+                  className="form-select"
+                  style={{
+                    maxWidth: '300px',
+                    marginBottom: '12px'
+                  }}
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                />
-                <button className="btn btn-primary btn-sm" onClick={() => payBill(bill.bill_id)}>Confirm Payment</button>
+                >
+                  <option value="">Select payment method</option>
+                  <option value="Card">Card</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Bank transfer">Bank transfer</option>
+                </select>
+
+                <button
+                  type="button"
+                  className="btn"
+                  style={{
+                    backgroundColor: '#28777b',
+                    color: '#ffffff',
+                    border: '1px solid #28777b'
+                  }}
+                  onClick={() => payBill(bill.bill_id)}
+                >
+                  Confirm Payment
+                </button>
               </div>
             )}
           </div>
