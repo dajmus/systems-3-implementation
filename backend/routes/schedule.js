@@ -5,9 +5,10 @@ const pool = require('../config/db');
 router.get('/available', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT schedule.slot_id, schedule.date_and_time, staff.name AS staff_name
+      `SELECT schedule.slot_id, schedule.date_and_time, schedule.staff_id, doctor.doctor_id, staff.name AS staff_name
        FROM schedule
        JOIN staff ON schedule.staff_id = staff.staff_id
+       JOIN doctor ON doctor.staff_id = schedule.staff_id
        WHERE schedule.slot_status = 'available'
        ORDER BY schedule.date_and_time`
     );
@@ -32,7 +33,7 @@ router.post('/', async (req, res) => {
       [staff_id, date_and_time]
     );
     res.status(201).json({ slot_id: result.insertId });
-  } 
+  }
   
   catch (err) {
     res.status(500).json({ message: 'Could not create slot.' });
@@ -51,7 +52,7 @@ router.delete('/:id', async (req, res) => {
     }
 
     res.json({ message: 'Slot removed.' });
-  } 
+  }
   
   catch (err) {
     res.status(500).json({ message: 'Could not remove slot.' });
