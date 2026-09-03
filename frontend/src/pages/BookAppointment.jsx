@@ -37,7 +37,7 @@ export default function BookAppointment() {
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.error || 'Could not book this slot.');
+        setMessage(data.message || 'Could not book this slot.');
         return;
       }
 

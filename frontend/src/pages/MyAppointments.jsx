@@ -30,7 +30,7 @@ export default function MyAppointments() {
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.error || 'Could not cancel this appointment.');
+        setMessage(data.message || 'Could not cancel this appointment.');
         return;
       }
 

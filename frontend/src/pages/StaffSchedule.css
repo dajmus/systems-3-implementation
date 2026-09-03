@@ -1,45 +1,53 @@
+body {
+  background-color: #0f6e73 !important;
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
 .staff-page {
   min-height: 100vh;
-  background-color: #0f6e73;
-}
-
-.staff-topbar {
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
   background-color: #ffffff;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.staff-topbar .btn-teal {
-  background-color: #0f6e73;
-  border-color: #0f6e73;
-  color: #ffffff;
+.staff-navbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  background-color: #ffffff !important;
+  padding: 1rem 2rem !important;
+
+  border-bottom: 1px solid #dee2e6 !important;
 }
 
-.staff-topbar .btn-teal:hover {
-  background-color: #0c5a5e;
-  border-color: #0c5a5e;
-  color: #ffffff;
+.staff-navbar-left {
+  display: flex !important;
+  gap: 8px !important;
 }
 
-.staff-topbar .btn-outline-teal {
-  background-color: transparent;
-  border-color: #0f6e73;
-  color: #0f6e73;
+.staff-nav-button {
+  background-color: #ffffff !important;
+  border: 1px solid #0f6e73 !important;
+  color: #0f6e73 !important;
 }
 
-.staff-topbar .btn-outline-teal:hover {
-  background-color: #e6f1f1;
-  border-color: #0f6e73;
-  color: #0f6e73;
+.staff-nav-button:hover {
+  background-color: #e6f1f1 !important;
+  border-color: #0f6e73 !important;
+  color: #0f6e73 !important;
 }
 
-.staff-topbar .btn-logout {
-  border-color: #6c757d;
-  color: #6c757d;
-}
-
-.staff-topbar .btn-logout:hover {
-  background-color: #f1f1f1;
+.staff-nav-active {
+  background-color: #ffffff !important;
+  border-color: #0f6e73 !important;
+  color: #0f6e73 !important;
 }
 
 .staff-content {
@@ -48,92 +56,84 @@
   padding: 3rem 1.5rem;
 }
 
+.staff-header {
+  margin-bottom: 2rem;
+}
+
 .staff-card {
   background-color: #ffffff;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-.staff-card h4 {
-  color: #0f6e73;
+.staff-button-primary {
+  background-color: #0f6e73 !important;
+  border-color: #0f6e73 !important;
+  color: #ffffff !important;
 }
 
-.staff-card h5 {
-  color: #0f6e73;
-  font-weight: 600;
+.staff-button-primary:hover {
+  background-color: #0c5a5e !important;
+  border-color: #0c5a5e !important;
+  color: #ffffff !important;
 }
 
-.staff-alert {
-  background-color: #e6f1f1;
-  border: 1px solid #0f6e73;
-  color: #0c5a5e;
-  border-radius: 8px;
+.appointments-section {
+  margin-top: 2rem;
 }
 
-.staff-form-control:focus {
-  border-color: #0f6e73;
-  box-shadow: 0 0 0 0.2rem rgba(15, 110, 115, 0.25);
-}
-
-.staff-btn-primary {
-  background-color: #0f6e73;
-  border-color: #0f6e73;
-}
-
-.staff-btn-primary:hover {
-  background-color: #0c5a5e;
-  border-color: #0c5a5e;
-}
-
-.appointment-item {
+.appointment-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8e8;
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 0.75rem;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-.appointment-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+.staff-button-outline {
+  background-color: #ffffff !important;
+  border-color: #0f6e73 !important;
+  color: #0f6e73 !important;
 }
 
-.appointment-time {
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.appointment-people {
-  color: #6c757d;
-  font-size: 0.9rem;
+.staff-button-outline:hover {
+  background-color: #0f6e73 !important;
+  border-color: #0f6e73 !important;
+  color: #ffffff !important;
 }
 
 .status-badge {
-  background-color: #0f6e73 !important;
+  background-color: #e6f1f1 !important;
+  color: #0f6e73 !important;
 }
 
-.appointment-item .btn-outline-primary {
-  border-color: #0f6e73;
-  color: #0f6e73;
-}
-
-.appointment-item .btn-outline-primary:hover {
-  background-color: #0f6e73;
-  border-color: #0f6e73;
-  color: #ffffff;
+.staff-page .form-control:focus {
+  border-color: #0f6e73 !important;
+  box-shadow: 0 0 0 0.2rem rgba(15, 110, 115, 0.2) !important;
 }
 
 .expand-panel {
   background-color: #f7fafa;
   border-radius: 8px;
   padding: 1rem;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
-.empty-state {
-  color: #6c757d;
-  text-align: center;
-  padding: 2rem 0;
+.staff-bg {
+  position: absolute;
+  pointer-events: none;
+}
+
+.staff-bg-top {
+  top: -80px;
+  left: -80px;
+  width: 380px;
+}
+
+.staff-bg-bottom {
+  bottom: -60px;
+  right: -60px;
+  width: 380px;
 }

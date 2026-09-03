@@ -65,28 +65,11 @@ function AppContent() {
     }
 
     return (
-      <div>
-        <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
-          <div>
-            <button
-              className={`btn btn-sm me-2 ${staffTab === 'schedule' ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setStaffTab('schedule')}
-            >
-              Appointments
-            </button>
-            <button
-              className={`btn btn-sm ${staffTab === 'catalog' ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setStaffTab('catalog')}
-            >
-              Services
-            </button>
-          </div>
-          <button className="btn btn-outline-secondary btn-sm" onClick={logout}>Log out</button>
-        </div>
-
-        {staffTab === 'schedule' && <StaffSchedule />}
-        {staffTab === 'catalog' && <Catalog />}
-      </div>
+      <StaffSchedule
+        activeTab={staffTab}
+        onNavigate={setStaffTab}
+        onLogout={logout}
+      />
     );
   }
 
