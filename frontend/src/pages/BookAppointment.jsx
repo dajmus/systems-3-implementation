@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import './PatientPages.css';
 
 const API_BASE = '/api';
 
@@ -36,37 +37,49 @@ export default function BookAppointment() {
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || 'Could not book this slot.');
+        setMessage(data.error || 'Could not book this slot.');
         return;
       }
 
       setMessage('Appointment booked.');
       loadSlots();
-    } 
-    
-    catch (err) {
+    } catch (err) {
       setMessage('Something went wrong. Please try again.');
     }
   };
 
   return (
-    <div className="container py-5">
-      <h4 className="fw-bold mb-3">Book an Appointment</h4>
+    <div className="patient-page">
+      <div className="patient-card">
+        <h4 className="fw-bold mb-3">Book an Appointment</h4>
 
-      {message && <div className="alert alert-info py-2">{message}</div>}
+        {message && <div className="alert patient-alert py-2">{message}</div>}
 
-      {slots.length === 0 && <p className="text-muted">No open slots right now.</p>}
+        {slots.length === 0 && (
+          <p className="patient-empty">No open slots right now.</p>
+        )}
 
-      <div className="list-group">
-        {slots.map((slot) => (
-          <div key={slot.slot_id} className="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <div>{new Date(slot.date_and_time).toLocaleString()}</div>
-              <div className="text-muted">Dr. {slot.staff_name}</div>
+        <div>
+          {slots.map((slot) => (
+            <div
+              key={slot.slot_id}
+              className="patient-list-item d-flex justify-content-between align-items-center flex-wrap gap-2"
+            >
+              <div>
+                <div className="patient-time">
+                  {new Date(slot.date_and_time).toLocaleString()}
+                </div>
+                <div className="patient-doctor">Dr. {slot.staff_name}</div>
+              </div>
+              <button
+                className="btn btn-teal-outline btn-sm"
+                onClick={() => bookSlot(slot)}
+              >
+                Book
+              </button>
             </div>
-            <button className="btn btn-outline-primary" onClick={() => bookSlot(slot)}>Book</button>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

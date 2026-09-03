@@ -48,7 +48,7 @@ export default function Login({ onSwitchToRegister, onLoginSuccess }) {
       const data = await response.json();
 
       if (!response.ok) {
-        setServerError(data.message || 'Login failed.');
+        setServerError(data.error || 'Login failed.');
         return;
       }
 
