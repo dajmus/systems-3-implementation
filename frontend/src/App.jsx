@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import BookAppointment from './pages/BookAppointment';
 import MyAppointments from './pages/MyAppointments';
+import StaffSchedule from './pages/StaffSchedule';
 
 function AppContent() {
   const [view, setView] = useState('login');
@@ -38,13 +39,11 @@ function AppContent() {
     }
 
     return (
-      <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center">
-        <h3>Logged in as {user.name || user.email}</h3>
-        <p className="text-muted">
-          Account type: {user.accountType}
-          {user.role ? ` (${user.role})` : ''}
-        </p>
-        <button className="btn btn-outline-secondary" onClick={logout}>Log out</button>
+      <div>
+        <div className="d-flex justify-content-end p-3 border-bottom">
+          <button className="btn btn-outline-secondary btn-sm" onClick={logout}>Log out</button>
+        </div>
+        <StaffSchedule />
       </div>
     );
   }
